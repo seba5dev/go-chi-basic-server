@@ -1,7 +1,11 @@
 package server
 
 import (
+	"go-chi-basic-server/internal/handler"
+	"go-chi-basic-server/internal/loader"
 	"go-chi-basic-server/internal/middleware"
+	"go-chi-basic-server/internal/repository"
+	"go-chi-basic-server/internal/service"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -12,7 +16,7 @@ import (
 type ConfigServerChi struct {
 	// ServerAddress is the address where the server will be listening
 	ServerAddress string
-	// LoaderFilePath is the path to the file that contains the database (json or csv now) we won't use it for now
+	// LoaderFilePath is the path to the file that contains the database (json or csv now)
 	LoaderFilePath string
 }
 
@@ -42,7 +46,7 @@ func NewServerChi(cfg *ConfigServerChi) *ServerChi {
 type ServerChi struct {
 	// serverAddress is the address where the server will be listening
 	serverAddress string
-	// loaderFilePath is the path to the file that contains the  database (json or csv now) we won't use it for now
+	// loaderFilePath is the path to the file that contains the  database (json or csv now)
 	loaderFilePath string
 }
 
@@ -50,9 +54,17 @@ type ServerChi struct {
 func (a *ServerChi) Run() error {
 	// dependencies
 	// - loader
+	ld := loader.NewSongsJSONFile(a.loaderFilePath)
+	db, err := ld.Load()
+	if err != nil {
+		return err
+	}
 	// - repository
+	rp := repository.NewSongsMap(db)
 	// - service
+	sv := service.NewSongsDefault(rp)
 	// - handler
+	hd := handler.NewSongDefault(sv)
 	// router
 	r := chi.NewRouter()
 	// - middlewares
@@ -61,10 +73,7 @@ func (a *ServerChi) Run() error {
 	// - endpoints
 	r.Route("/songs", func(rt chi.Router) {
 		// - GET /songs
-		rt.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			// For demonstration, we will just write a response
-			w.Write([]byte("List of songs"))
-		})
+		rt.Get("/", hd.GetAll())
 	})
 
 	// Create 404 handler for unmatched routes
@@ -77,7 +86,7 @@ func (a *ServerChi) Run() error {
 	// Print the server address to the console
 	println("Server is running on", a.serverAddress)
 	// run server
-	err := http.ListenAndServe(a.serverAddress, r)
+	err = http.ListenAndServe(a.serverAddress, r)
 	if err != nil {
 		return err
 	}
