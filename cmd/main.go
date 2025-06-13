@@ -21,6 +21,13 @@ func main() {
 	// Create a GET route which receives path parameters to search an article by date and slug
 	r.Get("/articles/{date}/{slug}", getArticle)
 
+	// Create 404 handler for unmatched routes
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		// This will send a 404 response with a custom message
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("404 - Not Found"))
+	})
+
 	// Start the HTTP server on port 8080
 	http.ListenAndServe(":8080", r)
 }
