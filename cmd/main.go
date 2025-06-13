@@ -1,17 +1,20 @@
 package main
 
 import (
+	"go-chi-basic-server/internal/middleware"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	// chiMiddleware "github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
 	// Create a new router
 	r := chi.NewRouter()
 	// Use middleware for logging (this is made from chi)
-	r.Use(middleware.Logger)
+	// r.Use(middleware.Logger)
+	// Let's use a custom logging middleware instead
+	r.Use(middleware.Logging)
 	// Create a simple GET route with a string response "Hello World!"
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		// byte is used to convert string to bytes
