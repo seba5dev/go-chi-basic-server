@@ -18,8 +18,11 @@ func main() {
 		w.Write([]byte("Hello World!"))
 	})
 
-	// Create a GET route which receives path parameters to search an article by date and slug
-	r.Get("/articles/{date}/{slug}", getArticle)
+	// Create a route group for articles
+	r.Route("/articles", func(r chi.Router) {
+		// Create a GET route which receives path parameters to search an article by date and slug
+		r.Get("/{date}/{slug}", getArticle)
+	})
 
 	// Create 404 handler for unmatched routes
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
