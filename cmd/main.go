@@ -1,48 +1,23 @@
 package main
 
 import (
-	"go-chi-basic-server/internal/middleware"
-	"net/http"
-
-	"github.com/go-chi/chi/v5"
-	// chiMiddleware "github.com/go-chi/chi/v5/middleware"
+	"fmt"
+	"go-chi-basic-server/cmd/server"
 )
 
 func main() {
-	// Create a new router
-	r := chi.NewRouter()
-	// Use middleware for logging (this is made from chi)
-	// r.Use(middleware.Logger)
-	// Let's use a custom logging middleware instead
-	r.Use(middleware.Logging)
-	// Create a simple GET route with a string response "Hello World!"
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		// byte is used to convert string to bytes
-		w.Write([]byte("Hello World!"))
-	})
+	// env
+	// ...
 
-	// Create a route group for articles
-	r.Route("/articles", func(r chi.Router) {
-		// Create a GET route which receives path parameters to search an article by date and slug
-		r.Get("/{date}/{slug}", getArticle)
-	})
-
-	// Create 404 handler for unmatched routes
-	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		// This will send a 404 response with a custom message
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("404 - Not Found"))
-	})
-
-	// Start the HTTP server on port 8080
-	http.ListenAndServe(":8080", r)
-}
-
-// getArticle handles the request to fetch an article by date and slug
-func getArticle(w http.ResponseWriter, r *http.Request) {
-	dateParam := chi.URLParam(r, "date")
-	slugParam := chi.URLParam(r, "slug")
-	// article, err := database.GetArticle(dateParam, slugParam)
-	// For demonstration, we will just write the parameters back to the response
-	w.Write([]byte("Article Date: " + dateParam + ", Slug: " + slugParam))
+	// app
+	// config
+	cfg := &server.ConfigServerChi{
+		ServerAddress: ":8080",
+	}
+	app := server.NewServerChi(cfg)
+	// run
+	if err := app.Run(); err != nil {
+		fmt.Println("Error running the server:", err)
+		return
+	}
 }
